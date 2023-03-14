@@ -14,9 +14,7 @@ NOTE: All of the functionality will be made on a Stripe Test Mode where you will
 
 # STRIPE REGISTER
 
-- Create an account or log into [Stripe](https://stripe.com/)
-
-- In the Stripe Dashboard make sure you can see your three credential values: Cloud Name, API Key and API Secret. You will need all three later.
+- Create an account or log into [Stripe](https://stripe.com/) and go to the Stripe Dashboard.
 
 - Check on the right bottom segment, a section for Developers, where you will see a `Publishable key` and a `Secret key`. You will need to use these two values during the implementation.
 
