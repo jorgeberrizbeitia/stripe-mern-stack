@@ -111,11 +111,11 @@ npm install @stripe/react-stripe-js @stripe/stripe-js
 ```js
 import service from "./config.services";
 
-const createPaymentIntent = (productId) => {
+const createPaymentIntentService = (productId) => {
   return service.post("/payment/create-payment-intent", productId)
 }
 
-export { createPaymentIntent };
+export { createPaymentIntentService };
 ```
 
 - Create a `.env.local` file. Inside, add a variable to named `REACT_APP_STRIPE_PUBLISHABLE_KEY` with the value for your stripe `Publishable key`. Also add a variable that points to the current Frontend url, this is used for a stripe redirection process. *Remember:* in react, all env variables need to start with `REACT_APP_`.
@@ -244,7 +244,7 @@ export default CheckoutForm;
 ```jsx
 // in "src/components/PaymentIntent.jsx"
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 
@@ -465,9 +465,14 @@ router.patch("/update-payment-intent", async (req, res, next) => {
 ```jsx
 // in "services/payment.services.js"
 
+// ... other service
+
 const updatePaymentIntentService = (paymentIntentInfo) => {
   return service.patch("/payment/update-payment-intent", paymentIntentInfo)
 }
+
+// exports MAKE SURE YOU EXPORT updatePaymentIntentService
+
 ```
 
 - Create a component called `<PaymentSuccess>` that will be invoked when receiving confirmation from stripe regarding "succeeded" payment.
