@@ -59,7 +59,8 @@ function CheckoutForm() {
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        // Make sure to change this to your payment completion page
+        // below will redirect to a payment success component that will update the payment model in the backend from "incomplete" to "succeeded"
+        // !IMPORTANT. If using VITE, make sure you use the correct variable naming and usage (import.meta.env.VITE_VARIABLE_NAME)
         return_url: `${process.env.REACT_APP_CLIENT_URL}/payment-success`,
       },
     });

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PaymentIntent from "../components/PaymentIntent";
-import { getProductDetailsService } from "../services/product.services";
+import axios from "axios";
 
 function Details() {
   const navigate = useNavigate();
@@ -17,8 +17,9 @@ function Details() {
 
   const getData = async () => {
     try {
-      const response = await getProductDetailsService(params.productId);
-      console.log(response)
+      const response = await axios.get(`http://localhost:5005/api/product/${params.productId}`);
+      // !IMPORTANT: Adapt the request structure to the one in your project (services, .env, auth, etc...)
+
       setProductDetails(response.data);
       setIsFetching(false);
     } catch (error) {

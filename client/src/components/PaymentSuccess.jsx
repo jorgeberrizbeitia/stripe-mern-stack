@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
-import { updatePaymentIntentService } from "../services/payment.services";
+import axios from "axios";
 
 const PaymentSuccess = () => {
 
@@ -33,7 +33,9 @@ const PaymentSuccess = () => {
     }
 
     try {
-      await updatePaymentIntentService(paymentIntentInfo);
+      await axios.patch("http://localhost:5005/api/payment/update-payment-intent", paymentIntentInfo)
+      // !IMPORTANT: Adapt the request structure to the one in your project (services, .env, auth, etc...)
+
       setIsFetching(false);
     } catch (error) {
       navigate("/error");

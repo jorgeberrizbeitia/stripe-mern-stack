@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createOneProductService } from "../services/product.services";
+import axios from "axios";
 
 // ! BASIC FLOW TO CREATE A NEW PRODUCT ONLY FOR TESTING
 
@@ -25,7 +25,9 @@ function Create() {
 
     try {
 
-      await createOneProductService(newProduct)
+      await axios.post("http://localhost:5005/api/product", newProduct)
+      // !IMPORTANT: Adapt the request structure to the one in your project (services, .env, auth, etc...)
+
       navigate("/product/list")
 
     } catch (error) {

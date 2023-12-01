@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getAllProductsService } from "../services/product.services";
+import axios from "axios";
 
 function List() {
   const navigate = useNavigate();
@@ -14,7 +14,10 @@ function List() {
 
   const getData = async () => {
     try {
-      const response = await getAllProductsService();
+
+      const response = await axios.get("http://localhost:5005/api/product");
+      // !IMPORTANT: Adapt the request structure to the one in your project (services, .env, auth, etc...)
+
       setAllProducts(response.data);
       setIsFetching(false);
     } catch (error) {

@@ -4,7 +4,7 @@ import { Elements } from "@stripe/react-stripe-js";
 
 import CheckoutForm from "./CheckoutForm";
 
-import { createPaymentIntentService } from "../services/payment.services";
+import axios from "axios";
 
 // Make sure to call loadStripe outside of a component’s render to avoid
 // recreating the Stripe object on every render.
@@ -22,7 +22,9 @@ function PaymentIntent({ productDetails }) {
   const handleUseEffect = async () => {
     //                   this is the product info sent to the backend with the product to purchase
     //                                                    |
-    const response = await createPaymentIntentService(productDetails)
+    const response = await axios.post("http://localhost:5005/api/payment/create-payment-intent", productDetails)
+    // !IMPORTANT: Adapt the request structure to the one in your project (services, .env, auth, etc...)
+
     setClientSecret(response.data.clientSecret)
   }
 
