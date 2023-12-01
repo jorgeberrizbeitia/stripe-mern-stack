@@ -106,28 +106,23 @@ module.exports = router
 npm install @stripe/react-stripe-js @stripe/stripe-js
 ```
 
-- (if using services) Create a service that will contact the route we just created in the backend. The service will receive the product to buy and send it in the body of the request.
-
-```js
-import service from "./config.services";
-
-const createPaymentIntentService = (productId) => {
-  return service.post("/payment/create-payment-intent", productId)
-}
-
-export { createPaymentIntentService };
-```
-
-- Create a `.env.local` file. Inside, add a variable to named `REACT_APP_STRIPE_PUBLISHABLE_KEY` with the value for your stripe `Publishable key`. Also add a variable that points to the current Frontend url, this is used for a stripe redirection process. *Remember:* in react, all env variables need to start with `REACT_APP_`.
+- Create a `.env.local` file. Inside, add a variable to named `REACT_APP_STRIPE_PUBLISHABLE_KEY` with the value for your stripe `Publishable key`. Also add a variable that points to the current Frontend url, this is used for a stripe redirection process. *Important:* the current naming `REACT_APP_VARIABLE NAME` applies to projects created with create-react-app. If using VITE, rename to `VITE_VARIABLE NAME`.
 
 ```.env
 REACT_APP_CLIENT_URL=http://localhost:3000
 REACT_APP_STRIPE_PUBLISHABLE_KEY=value
+
+# ... or
+
+VITE_CLIENT_URL=http://localhost:3000
+VITE_STRIPE_PUBLISHABLE_KEY=value
 ```
 
 - Create a `<CheckoutForm>` component that will render the credit card form. This component will contact Stripe for card approval and it will also later contact our backend for changing the status of our `Payment` documents.
 
-- You can find all the code for this component below. Most of the code comes from the stripe documentation with a small change in `return_url:`. Additionally, we won't need to make many changes to this file.
+- You can find all the code for this component below. Most of the code comes from the stripe documentatio. We only make a small change in `return_url:` where we indicate the URL the user should be redirected after payment. Currently: `${process.env.REACT_APP_CLIENT_URL}` or `${import.meta.env.VITE_CLIENT_URL}` which will point to home. This can later be changed if we want a specific page for payment success.
+
+- Asides from that, we won't need to make any changes to this file.
 
 ```jsx
 // in "src/components/CheckoutForm.jsx"
@@ -194,6 +189,7 @@ function CheckoutForm() {
       elements,
       confirmParams: {
         // Make sure to change this to your payment completion page
+        // !IMPORTANT. If using VITE, make sure you use the correct variable naming and usage (import.meta.env.VITE_VARIABLE_NAME)
         return_url: `${process.env.REACT_APP_CLIENT_URL}`,
       },
     });
@@ -250,12 +246,13 @@ import { Elements } from "@stripe/react-stripe-js";
 
 import CheckoutForm from "./CheckoutForm";
 
-import { createPaymentIntentService } from "../services/payment.services";
+import axios from "axios";
 
 // Make sure to call loadStripe outside of a component’s render to avoid
 // recreating the Stripe object on every render.
 // This is your test publishable API key.
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY); // Make sure you add your publishable API key to the .env.local
+// !IMPORTANT. If using VITE, make sure you use the correct variable naming and usage (import.meta.env.VITE_VARIABLE_NAME)
 
 function PaymentIntent({ productDetails }) {
   const [clientSecret, setClientSecret] = useState("");
@@ -266,9 +263,11 @@ function PaymentIntent({ productDetails }) {
   }, []);
   
   const handleUseEffect = async () => {
-    //                   this is the product info sent to the backend with the product to purchase
-    //                                                    |
-    const response = await createPaymentIntentService(productDetails)
+    //                                                        this is the product that the user is trying to purchase, sent to the backend
+    //                                                                                                  |
+     const response = await axios.post("http://localhost:5005/api/payment/create-payment-intent", productDetails)
+    // !IMPORTANT: Adapt the request structure to the one in your project (services, .env, auth, etc...)
+
     setClientSecret(response.data.clientSecret)
   }
 
@@ -311,7 +310,7 @@ const [showPaymentIntent, setShowPaymentIntent] = useState(false)
   { 
     showPaymentIntent === false
     ? <button onClick={() => setShowPaymentIntent(true)}>Purchase</button> 
-    : <PaymentIntent productDetails={ /* pass your product details here as props */ }/> 
+    : <PaymentIntent productDetails={ /* pass the details of the product to buy here as props */ }/> 
   }
 </div>
 ```
@@ -460,21 +459,6 @@ router.patch("/update-payment-intent", async (req, res, next) => {
 
 ## 2.2. FRONTEND CONFIG. Apply all below steps on your Client side.
 
-- (if using services) Create a service inside `payment.services` to access the route created in the previous steps. This function will receive a `paymentIntentInfo` object with the `client secret` and the `payment intent id`.
-
-```jsx
-// in "services/payment.services.js"
-
-// ... other service
-
-const updatePaymentIntentService = (paymentIntentInfo) => {
-  return service.patch("/payment/update-payment-intent", paymentIntentInfo)
-}
-
-// exports MAKE SURE YOU EXPORT updatePaymentIntentService
-
-```
-
 - Create a component called `<PaymentSuccess>` that will be invoked when receiving confirmation from stripe regarding "succeeded" payment.
 
 - This component will receive the `client secret` and the `payment intent id` in the form of queries. When testing you will see it in the URL. So the idea of the component is that it will extract the information from `queries` and contact the backend through the `updatePaymentIntentService` to update the `Payment` document.
@@ -485,7 +469,7 @@ const updatePaymentIntentService = (paymentIntentInfo) => {
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
-import { updatePaymentIntentService } from "../services/payment.services";
+import axios from "axios";
 
 const PaymentSuccess = () => {
 
@@ -515,7 +499,9 @@ const PaymentSuccess = () => {
     }
 
     try {
-      await updatePaymentIntentService(paymentIntentInfo);
+      await axios.patch("http://localhost:5005/api/payment/update-payment-intent", paymentIntentInfo)
+      // !IMPORTANT: Adapt the request structure to the one in your project (services, .env, auth, etc...)
+
       setIsFetching(false);
     } catch (error) {
       navigate("/error");
@@ -559,7 +545,11 @@ Go to the `<CheckoutForm>` component. Go to the line where it says `return_url: 
 
 // ... inside handleSubmit
 
+// if using create-react-app:
 return_url: `${process.env.REACT_APP_CLIENT_URL}/payment-success`,
+
+// ... or if using VITE:
+return_url: `${import.meta.env.VITE_CLIENT_URL}/payment-success`,
 
 // ...
 ```

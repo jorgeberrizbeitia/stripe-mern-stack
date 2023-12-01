@@ -10,6 +10,7 @@ import axios from "axios";
 // recreating the Stripe object on every render.
 // This is your test publishable API key.
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY); // Make sure you add your publishable API key to the .env.local
+// !IMPORTANT. If using VITE, make sure you use the correct variable naming and usage (import.meta.env.VITE_VARIABLE_NAME)
 
 function PaymentIntent({ productDetails }) {
   const [clientSecret, setClientSecret] = useState("");
